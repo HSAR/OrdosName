@@ -1,0 +1,105 @@
+name: OrdosName
+main: org.landofordos.ordosname.OrdosName
+version: 0.3
+softdepend: [Towny]
+commands:
+    ordosname:
+        description: Main OrdosName command
+        usage: /ordosname help
+    setfirstname:
+        description: Set first name
+        usage: /setfirstname [name] [target]
+        permission: ordosname.name.first.self
+        permission-message: You don't have permission to set first names.
+        aliases: [sfn]
+    setlastname:
+        description: Set last name
+        usage: /setlastname [name] [target]
+        permission: ordosname.name.last.self
+        permission-message: You don't have permission to set last names.
+        aliases: [sln]
+    settitle:
+        description: Set title
+        usage: /settitle [title] [overrides firstname?] [target]
+        permission: ordosname.name.title.self
+        permission-message: You don't have permission to set titles.
+        aliases: [st]
+    setsuffix:
+        description: Set suffix
+        usage: /setsuffix [name] [target]
+        permission: ordosname.name.suffix.self
+        permission-message: You don't have permission to set last names.
+        aliases: [ss]
+    namereload:
+        description: Reload someone's name
+        usage: /namereload [username]
+        permission: ordosname.reload.name
+        permission-message: You don't have permission to do that.
+permissions:
+    ordosname.*:
+        description: Gives access to all OrdosName commands
+        default: op
+        children:
+            ordosname.name.*: true
+            ordosname.reload.*: true            
+    ordosname.name.*:
+        description: Gives access to all name-related commands
+        default: false
+        children:
+            ordosname.name.first.self: true
+            ordosname.name.first.others: true
+            ordosname.name.last.self: true
+            ordosname.name.last.others: true
+            ordosname.name.title.self: true  
+            ordosname.name.title.others: true   
+            ordosname.name.suffix.self: true  
+            ordosname.name.suffix.others: true  
+    ordosname.name.first.self:
+        description: Allows the user to set their first name.
+        default: false
+    ordosname.name.first.others:
+        description: Allows the user to set others' first names.
+        default: false 
+    ordosname.name.last.self:
+        description: Allows the user to set their last name.
+        default: false
+    ordosname.name.last.others:
+        description: Allows the user to set others' last names.
+        default: false 
+    ordosname.name.title.self:
+        description: Allows the user to set their title.
+        default: false
+    ordosname.name.title.others:
+        description: Allows the user to set others' title.
+        default: false
+    ordosname.name.suffix.self:
+        description: Allows the user to set their suffix.
+        default: false
+    ordosname.name.suffix.others:
+        description: Allows the user to set others' suffix.
+        default: false
+    ordosname.reload.*:
+        default: op
+        description: Allows use of all reload commands
+        children:
+            ordosname.reload.self: true
+            ordosname.reload.others: true
+    ordosname.reload.self:
+        description: Allows access to reloading your own name
+        default: true
+    ordosname.reload.others:
+        description: Allows access to reloading other people's names
+        default: false
+    ordosname.admin.*:    
+        description: Allows access to all admin commands
+        default: op
+        children:
+            ordosname.admin.namecheck: true
+            ordosname.admin.reloadconfig: true
+    ordosname.admin.namecheck:
+        description: Allows access to checking someone's name
+        default: false
+    ordosname.admin.reloadconfig:
+        description: Allows access to reloading the plugin's configuration file
+        default: false
+            
