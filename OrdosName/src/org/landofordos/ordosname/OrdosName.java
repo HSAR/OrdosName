@@ -289,6 +289,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								if (name.length() > 0) {
 									sender.sendMessage(ChatColor.GREEN + "The name of user " + ChatColor.WHITE + args[2] + ChatColor.GREEN + " is "
 											+ ChatColor.WHITE + name);
+									return true;
 								}
 							}
 						}
@@ -303,6 +304,10 @@ public class OrdosName extends JavaPlugin implements Listener {
 						if (!(tryRS == null) && (tryRS.first())) {
 							sender.sendMessage(ChatColor.GREEN + "The username of " + ChatColor.WHITE + nameToCheck + ChatColor.GREEN + " is "
 									+ ChatColor.WHITE + tryRS.getString("displayname"));
+							return true;
+						} else {
+							sender.sendMessage(ChatColor.GREEN + "No results found.");
+							return true;
 						}
 					} catch (SQLException e) {
 						e.printStackTrace();
@@ -562,7 +567,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record
 								statement.executeUpdate("INSERT INTO " + dbTable
-										+ " (user, title, titleoverridesfirst, townysuffix, lastseen) VALUES ('" + sender.getName()
+										+ " (user, title, titleoverridesfirst, townytitle, lastseen) VALUES ('" + sender.getName()
 										+ "', NULL, FALSE, " + useTowny + ", '" + timestamp + "');");
 							}
 							if (statement != null) {
@@ -579,16 +584,40 @@ public class OrdosName extends JavaPlugin implements Listener {
 				}
 				return false;
 			} else {
-				// does the title override the first name?
-				boolean overridefirst = false;
-				// if no override specified (i.e. of args.length == 1) leave it as the default, which is FALSE.
-				// otherwise parse the override
-				if (args.length >= 2) {
-					overridefirst = Boolean.parseBoolean(args[1]);
+				String title = "";
+				String target = null;
+				// boolean object - null represents title not started, true title in progress, false title ended
+				Boolean titlestarted = null;
+				for (int i = 0; i < args.length; i++) {
+					if (target == null) {
+						if (args[i].startsWith("\"")) {
+							titlestarted = true;
+						}
+						if (titlestarted == true) {
+							title += " " + args[i];
+							if (args[i].endsWith("\"")) {
+								titlestarted = false;
+							}
+						}
+						if ((titlestarted == null) && (i < (args.length - 1))) {
+							target = args[i + 1];
+						}
+					}
 				}
-				if (args.length < 3) {
+				if ((titlestarted == false) && (title.length() > 2)) {
+					// trim off the start and end speech marks
+					title = title.substring(2, title.length() - 1);
+				}
+				// if the title never started, assume single word title and pick a target if it was specified.
+				if (titlestarted == null) {
+					title = args[0];
+					if (args.length > 1) {
+						target = args[1];
+					}
+				}
+				if (target == null) {
 					if (!(sender instanceof Player)) {
-						// if no target specified take target to be self, but this only works if you are a player
+						// if only one arg specified take target to be self, but this only works if you are a player
 						sender.sendMessage("You cannot do this since you are not a player.");
 						return false;
 					} else {
@@ -600,15 +629,13 @@ public class OrdosName extends JavaPlugin implements Listener {
 								ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE user = '" + sender.getName() + "';");
 								if (!(tryRS == null) && (tryRS.first())) {
 									// if there's a result, update the table instead of inserting.
-									statement.executeUpdate("UPDATE " + dbTable + " SET title = '" + args[0] + "', titleoverridesfirst = "
-											+ overridefirst + ", lastseen = '" + timestamp + "' WHERE user= '" + sender.getName() + "';");
+									statement.executeUpdate("UPDATE " + dbTable + " SET title = '" + title + "', lastseen = '" + timestamp
+											+ "' WHERE user= '" + sender.getName() + "';");
 								} else {
 									// If no result was returned then the user has not been added before.
 									// Use INSERT instead of update to create the record.
-									statement.executeUpdate("INSERT INTO " + dbTable
-											+ " (user, title, titleoverridesfirst, last, townysuffix, lastseen)" + " VALUES ('" + sender.getName()
-											+ "', '" + args[0] + "', " + overridefirst + ", '" + sender.getName() + "', " + useTowny + ", '"
-											+ timestamp + "');");
+									statement.executeUpdate("INSERT INTO " + dbTable + " (user, title, last, townytitle, lastseen) VALUES ('"
+											+ sender.getName() + "', '" + title + "', '" + sender.getName() + "', FALSE, '" + timestamp + "');");
 								}
 								if (statement != null) {
 									statement.close();
@@ -622,23 +649,21 @@ public class OrdosName extends JavaPlugin implements Listener {
 							// "You don't have permission!"
 						}
 					}
-				}
-				if (args.length == 3) {
+				} else {
 					// permission check
 					if (sender.hasPermission("ordosname.name.title.others")) {
 						try {
 							Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-							ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE user = '" + args[2] + "';");
+							ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE user = '" + target + "';");
 							if (!(tryRS == null) && (tryRS.first())) {
 								// if there's a result, update the table instead of inserting.
-								statement.executeUpdate("UPDATE " + dbTable + " SET title = '" + args[0] + "', titleoverridesfirst = "
-										+ overridefirst + ", lastseen = '" + timestamp + "' WHERE user= '" + args[2] + "';");
+								statement.executeUpdate("UPDATE " + dbTable + " SET title = '" + title + "', lastseen = '" + timestamp
+										+ "' WHERE user= '" + target + "';");
 							} else {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record.
-								statement.executeUpdate("INSERT INTO " + dbTable
-										+ " (user, title, titleoverridesfirst, last, townysuffix, lastseen) VALUES ('" + args[2] + "', '" + args[0]
-										+ "', " + overridefirst + ", '" + args[2] + ", " + useTowny + ", '" + timestamp + "');");
+								statement.executeUpdate("INSERT INTO " + dbTable + " (user, title, last, townytitle, lastseen) VALUES ('" + target
+										+ "', '" + title + "', '" + target + "', FALSE, '" + timestamp + "');");
 							}
 							if (statement != null) {
 								statement.close();
@@ -646,7 +671,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
-						reloadPlayerName((Player) sender);
+						reloadPlayerName(server.getPlayer(target));
 						return true;
 					} else {
 						// "You don't have permission!"
@@ -695,8 +720,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 			} else {
 				String suffix = "";
 				String target = null;
-				// boolean object - false represents suffix not started, true suffix in progress, null suffix ended
-				Boolean suffixstarted = false;
+				// boolean object - null represents suffix not started, true suffix in progress, false suffix ended
+				Boolean suffixstarted = null;
 				for (int i = 0; i < args.length; i++) {
 					if (target == null) {
 						if (args[i].startsWith("\"")) {
@@ -705,7 +730,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						if (suffixstarted == true) {
 							suffix += " " + args[i];
 							if (args[i].endsWith("\"")) {
-								suffixstarted = null;
+								suffixstarted = false;
 							}
 						}
 						if ((suffixstarted == null) && (i < (args.length - 1))) {
@@ -713,12 +738,12 @@ public class OrdosName extends JavaPlugin implements Listener {
 						}
 					}
 				}
-				if (suffixstarted == null) {
+				if ((suffixstarted == false) && (suffix.length() > 2)) {
 					// trim off the start and end speech marks
 					suffix = suffix.substring(2, suffix.length() - 1);
 				}
 				// if the suffix never started, assume single word suffix and pick a target if it was specified.
-				if (!suffixstarted) {
+				if (suffixstarted == null) {
 					suffix = args[0];
 					if (args.length > 1) {
 						target = args[1];
@@ -780,7 +805,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
-						reloadPlayerName((Player) sender);
+						reloadPlayerName(server.getPlayer(target));
 						return true;
 					} else {
 						// "You don't have permission!"
