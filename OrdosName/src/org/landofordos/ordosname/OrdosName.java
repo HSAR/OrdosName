@@ -234,14 +234,15 @@ public class OrdosName extends JavaPlugin implements Listener {
 				} else {
 					// if the nameToCheck never ENDED, that's bad news.
 					// assume all is well, though, and just chop off the start.
-					if (nameToCheckstarted == true) {
+					if (nameToCheckstarted) {
 						nameToCheck = nameToCheck.substring(2, nameToCheck.length());
 					}
+					// if the nameToCheck never started, assume single word nameToCheck
+					if (!nameToCheckstarted) {
+						nameToCheck = args[1];
+					}
 				}
-				// if the nameToCheck never started, assume single word nameToCheck
-				if (!nameToCheckstarted) {
-					nameToCheck = args[0];
-				}
+				logger.info(nameToCheck);
 				if (server.getPlayer(nameToCheck) != null) {
 					// the server returns a player object when queried
 					Player player = server.getPlayer(nameToCheck);
@@ -287,7 +288,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 									name = name.substring(0, name.length() - 1);
 								}
 								if (name.length() > 0) {
-									sender.sendMessage(ChatColor.GREEN + "The name of user " + ChatColor.WHITE + args[2] + ChatColor.GREEN + " is "
+									sender.sendMessage(ChatColor.DARK_GREEN + "The name of user " + ChatColor.WHITE + nameToCheck + ChatColor.DARK_GREEN + " is "
 											+ ChatColor.WHITE + name);
 									return true;
 								}
@@ -302,11 +303,11 @@ public class OrdosName extends JavaPlugin implements Listener {
 						Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 						ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE displayname = '" + nameToCheck + "';");
 						if (!(tryRS == null) && (tryRS.first())) {
-							sender.sendMessage(ChatColor.GREEN + "The username of " + ChatColor.WHITE + nameToCheck + ChatColor.GREEN + " is "
-									+ ChatColor.WHITE + tryRS.getString("displayname"));
+							sender.sendMessage(ChatColor.DARK_GREEN + "The username of " + ChatColor.WHITE + nameToCheck + ChatColor.DARK_GREEN + " is "
+									+ ChatColor.WHITE + tryRS.getString("user"));
 							return true;
 						} else {
-							sender.sendMessage(ChatColor.GREEN + "No results found.");
+							sender.sendMessage(ChatColor.DARK_GREEN + "No results found.");
 							return true;
 						}
 					} catch (SQLException e) {
