@@ -288,8 +288,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 									name = name.substring(0, name.length() - 1);
 								}
 								if (name.length() > 0) {
-									sender.sendMessage(ChatColor.DARK_GREEN + "The name of user " + ChatColor.WHITE + nameToCheck + ChatColor.DARK_GREEN + " is "
-											+ ChatColor.WHITE + name);
+									sender.sendMessage(ChatColor.DARK_GREEN + "The name of user " + ChatColor.WHITE + nameToCheck
+											+ ChatColor.DARK_GREEN + " is " + ChatColor.WHITE + name);
 									return true;
 								}
 							}
@@ -303,8 +303,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 						Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 						ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE displayname = '" + nameToCheck + "';");
 						if (!(tryRS == null) && (tryRS.first())) {
-							sender.sendMessage(ChatColor.DARK_GREEN + "The username of " + ChatColor.WHITE + nameToCheck + ChatColor.DARK_GREEN + " is "
-									+ ChatColor.WHITE + tryRS.getString("user"));
+							sender.sendMessage(ChatColor.DARK_GREEN + "The username of " + ChatColor.WHITE + nameToCheck + ChatColor.DARK_GREEN
+									+ " is " + ChatColor.WHITE + tryRS.getString("user"));
 							return true;
 						} else {
 							sender.sendMessage(ChatColor.DARK_GREEN + "No results found.");
@@ -973,9 +973,23 @@ public class OrdosName extends JavaPlugin implements Listener {
 		try {
 			townname = TownyUniverse.getDataSource().getResident(player.getName()).getTown().getName();
 		} catch (Exception e) {
-			// if they aren't registered then just leave it
+			// if they aren't registered to a town, reset their suffix
 			if (verbose) {
-				logger.info("Attempted to add suffix to player " + player.getName() + " but they do not belong to a town.");
+				logger.info("Player " + player.getName() + " does not belong to a town. Resetting suffix.");
+				try {
+					Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+					ResultSet RS = statement.executeQuery("SELECT suffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
+					if (!(RS == null) && (RS.first())) {
+						// if the user is already in the database, update their record
+						statement.executeUpdate("UPDATE " + dbTable + " SET suffix = '' WHERE user= '" + player.getName() + "';");
+					} else {
+						// if the user is not already in the database, insert a new record
+						statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
+								+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
+					}
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
 				return;
 			}
 		}
@@ -1008,9 +1022,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 					}
 				} else {
 					// if the user is not already in the database, insert a new record with their username (so that the suffix doesn't look stupid)
-					statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 					statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
-							+ "', '" + player.getName() + "', " + useTowny + ", '" + timestamp + "');");
+							+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -1043,7 +1056,6 @@ public class OrdosName extends JavaPlugin implements Listener {
 				statement.executeUpdate("UPDATE " + dbTable + " SET lastseen = '" + timestamp + "' WHERE user= '" + player.getName() + "';");
 			} else {
 				// if the user is not already in the database, insert a new record with their username (so that suffixes and titles don't look stupid)
-				statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 				statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('" + player.getName() + "', '"
 						+ player.getName() + "', " + useTowny + ", '" + timestamp + "');");
 			}
