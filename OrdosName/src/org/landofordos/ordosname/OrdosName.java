@@ -432,7 +432,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
-						reloadPlayerName((Player) sender);
+						reloadPlayerName(server.getPlayer(args[1]));
 						return true;
 					} else {
 						// "You don't have permission!"
@@ -536,7 +536,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
-						reloadPlayerName((Player) sender);
+						reloadPlayerName(server.getPlayer(args[1]));
 						return true;
 					} else {
 						// "You don't have permission!"
