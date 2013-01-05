@@ -242,7 +242,6 @@ public class OrdosName extends JavaPlugin implements Listener {
 						nameToCheck = args[1];
 					}
 				}
-				logger.info(nameToCheck);
 				if (server.getPlayer(nameToCheck) != null) {
 					// the server returns a player object when queried
 					Player player = server.getPlayer(nameToCheck);
