@@ -424,6 +424,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// Use INSERT instead of update to create the record
 								statement.executeUpdate("INSERT INTO " + dbTable + " (user, first, last, townysuffix, lastseen) VALUES ('"
 										+ sender.getName() + "', NULL, '" + sender.getName() + "', '" + useTowny + ", '" + timestamp + "');");
+								logger.info("Database entry was created for " + sender.getName());
 							}
 							if (statement != null) {
 								statement.close();
@@ -460,6 +461,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 									// Use INSERT instead of update to create the record.
 									statement.executeUpdate("INSERT INTO " + dbTable + " (user, first, townysuffix, lastseen) VALUES ('"
 											+ sender.getName() + "', '" + args[0] + "', " + useTowny + ", '" + timestamp + "');");
+									logger.info("Database entry was created for " + sender.getName());
 								}
 								if (statement != null) {
 									statement.close();
@@ -489,6 +491,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// Use INSERT instead of update to create the record.
 								statement.executeUpdate("INSERT INTO " + dbTable + " (user, first, townysuffix, lastseen) VALUES ('" + args[1]
 										+ "', '" + args[0] + "', " + useTowny + ", '" + timestamp + "');");
+								logger.info("Database entry was created for " + args[1]);
 							}
 							if (statement != null) {
 								statement.close();
@@ -530,6 +533,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// since the last name of a player is never null, we set it to their actual username instead
 								statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('"
 										+ sender.getName() + "', '" + sender.getName() + "', " + useTowny + ", '" + timestamp + "');");
+								logger.info("Database entry was created for " + sender.getName());
 							}
 							if (statement != null) {
 								statement.close();
@@ -566,6 +570,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 									// Use INSERT instead of update to create the record.
 									statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('"
 											+ sender.getName() + "', '" + args[0] + "', " + useTowny + ", '" + timestamp + "');");
+									logger.info("Database entry was created for " + sender.getName());
 								}
 								if (statement != null) {
 									statement.close();
@@ -595,6 +600,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// Use INSERT instead of update to create the record.
 								statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('" + args[1]
 										+ "', '" + args[0] + "', " + useTowny + ", '" + timestamp + "');");
+								logger.info("Database entry was created for " + args[1]);
 							}
 							if (statement != null) {
 								statement.close();
@@ -634,6 +640,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// Use INSERT instead of update to create the record
 								statement.executeUpdate("INSERT INTO " + dbTable + " (user, title, titleoverridesfirst, last, lastseen) VALUES ('"
 										+ sender.getName() + "', NULL, FALSE, '" + sender.getName() + "', '" + timestamp + "');");
+								logger.info("Database entry was created for " + sender.getName());
 							}
 							if (statement != null) {
 								statement.close();
@@ -701,6 +708,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 									// Use INSERT instead of update to create the record.
 									statement.executeUpdate("INSERT INTO " + dbTable + " (user, title, last, townytitle, lastseen) VALUES ('"
 											+ sender.getName() + "', '" + title + "', '" + sender.getName() + "', FALSE, '" + timestamp + "');");
+									logger.info("Database entry was created for " + sender.getName());
 								}
 								if (statement != null) {
 									statement.close();
@@ -729,6 +737,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// Use INSERT instead of update to create the record.
 								statement.executeUpdate("INSERT INTO " + dbTable + " (user, title, last, townytitle, lastseen) VALUES ('" + target
 										+ "', '" + title + "', '" + target + "', FALSE, '" + timestamp + "');");
+								logger.info("Database entry was created for " + target);
 							}
 							if (statement != null) {
 								statement.close();
@@ -768,6 +777,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// Use INSERT instead of update to create the record
 								statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('"
 										+ sender.getName() + "', '" + sender.getName() + "', FALSE, '" + timestamp + "');");
+								logger.info("Database entry was created for " + sender.getName());
 							}
 							if (statement != null) {
 								statement.close();
@@ -835,6 +845,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 									// Use INSERT instead of update to create the record.
 									statement.executeUpdate("INSERT INTO " + dbTable + " (user, suffix, last, townysuffix, lastseen) VALUES ('"
 											+ sender.getName() + "', '" + suffix + "', '" + sender.getName() + "', FALSE, '" + timestamp + "');");
+									logger.info("Database entry was created for " + sender.getName());
 								}
 								if (statement != null) {
 									statement.close();
@@ -863,6 +874,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// Use INSERT instead of update to create the record.
 								statement.executeUpdate("INSERT INTO " + dbTable + " (user, suffix, last, townysuffix, lastseen) VALUES ('" + target
 										+ "', '" + suffix + "', '" + target + "', FALSE, '" + timestamp + "');");
+								logger.info("Database entry was created for " + target);
+								
 							}
 							if (statement != null) {
 								statement.close();
@@ -881,6 +894,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 
 		return false;
 	}
+	
 
 	private void dbcleanup() {
 		// sql query for datediff (much easier than doing so in-code)
@@ -1050,6 +1064,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						// if the user is not already in the database, insert a new record
 						statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
 								+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
+						logger.info("Database entry was created for " + player.getName());
 					}
 				} catch (SQLException e1) {
 					e1.printStackTrace();
@@ -1088,6 +1103,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 					// if the user is not already in the database, insert a new record with their username (so that the suffix doesn't look stupid)
 					statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
 							+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
+					logger.info("Database entry was created for " + player.getName());
 				}
 			} catch (SQLException e) {
 				e.printStackTrace();
@@ -1105,6 +1121,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						// if the user is not already in the database, insert a new record
 						statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
 								+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
+						logger.info("Database entry was created for " + player.getName());
 					}
 				} catch (SQLException e1) {
 					e1.printStackTrace();
@@ -1142,6 +1159,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 				// if the user is not already in the database, insert a new record with their username (so that suffixes and titles don't look stupid)
 				statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('" + player.getName() + "', '"
 						+ player.getName() + "', " + useTowny + ", '" + timestamp + "');");
+				logger.info("Database entry was created for " + player.getName());
 			}
 			// if towny integration enabled AND townysuffix enabled, check for the town they belong to and add the suffix
 			if (useTowny) {
