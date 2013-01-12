@@ -351,7 +351,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								return true;
 							}
 						}
-						if ((sender.hasPermission("ordosname.reload.others")) && (args.length == 2)) {// set the user's own townysuffix to ON
+						if ((sender.hasPermission("ordosname.suffix.others")) && (args.length == 2)) {// set the user's own townysuffix to ON
 							try {
 								Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 								ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE user = '" + args[1] + "';");
