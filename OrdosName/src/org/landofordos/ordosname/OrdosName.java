@@ -696,7 +696,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 							ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE user = '" + sender.getName() + "';");
 							if (!(tryRS == null) && (tryRS.first())) {
 								// if there's a result, update the table instead of inserting.
-								statement.executeUpdate("UPDATE " + dbTable + " SET suffix = NULL, lastseen = '" + timestamp + "' WHERE user= '"
+								statement.executeUpdate("UPDATE " + dbTable + " SET suffix = NULL, townysuffix = FALSE, lastseen = '" + timestamp + "' WHERE user= '"
 										+ sender.getName() + "';");
 							} else {
 								// If no result was returned then the user has not been added before.
