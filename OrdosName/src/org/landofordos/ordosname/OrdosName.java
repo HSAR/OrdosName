@@ -432,7 +432,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
-						reloadPlayerName(server.getPlayer(args[1]));
+						reloadPlayerName(sender, args[1]);
 						return true;
 					} else {
 						// "You don't have permission!"
@@ -536,7 +536,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
-						reloadPlayerName(server.getPlayer(args[1]));
+						reloadPlayerName(sender, args[1]);
 						return true;
 					} else {
 						// "You don't have permission!"
@@ -882,7 +882,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						if (name.length() < 1) {
 							sender.sendMessage(ChatColor.RED + "Data was found, but all fields were NULL");
 						} else {
-							sender.sendMessage(ChatColor.RED + "Data was found, name reloaded.");
+							sender.sendMessage(ChatColor.RED + "Player " + player.getName() + "'s name set to " + name);
 							recordDisplayName(playername, name);
 							player.setDisplayName(name);
 						}
@@ -944,7 +944,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						}
 					} else {
 						if (verbose) {
-							logger.info("Data was found, name reloaded.");
+							logger.info("Player " + player.getName() + "'s name set to " + name);
 						}
 						player.setDisplayName(name);
 						recordDisplayName(player.getName(), name);
@@ -1027,6 +1027,26 @@ public class OrdosName extends JavaPlugin implements Listener {
 			} catch (SQLException e) {
 				e.printStackTrace();
 			}
+		} else {
+			if (verbose) {
+				logger.info("Player " + player.getName() + " does not belong to a town. Resetting suffix.");
+				try {
+					Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+					ResultSet RS = statement.executeQuery("SELECT suffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
+					if (!(RS == null) && (RS.first())) {
+						// if the user is already in the database, update their record
+						statement.executeUpdate("UPDATE " + dbTable + " SET suffix = '' WHERE user= '" + player.getName() + "';");
+					} else {
+						// if the user is not already in the database, insert a new record
+						statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
+								+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
+					}
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+				return;
+			}
+			
 		}
 	}
 
