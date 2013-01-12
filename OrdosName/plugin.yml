@@ -1,6 +1,6 @@
 name: OrdosName
 main: org.landofordos.ordosname.OrdosName
-version: 0.3
+version: 0.4
 softdepend: [Towny]
 commands:
     ordosname:
