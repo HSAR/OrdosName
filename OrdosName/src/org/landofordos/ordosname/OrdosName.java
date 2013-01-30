@@ -25,6 +25,9 @@ import com.palmergames.bukkit.towny.Towny;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
 public class OrdosName extends JavaPlugin implements Listener {
+	enum inputStarted {
+		never, started, finished
+	};
 
 	// Important plugin objects
 	private static Server server;
@@ -658,17 +661,17 @@ public class OrdosName extends JavaPlugin implements Listener {
 			} else {
 				String title = "";
 				String target = null;
-				// boolean object - null represents title not started, true title in progress, false title ended
-				Boolean titlestarted = null;
+				// now an enum var to avoid NPEs.
+				inputStarted titlestarted = inputStarted.never;
 				for (int i = 0; i < args.length; i++) {
 					if (target == null) {
 						if (args[i].startsWith("\"")) {
-							titlestarted = true;
+							titlestarted = inputStarted.started;
 						}
-						if (titlestarted == true) {
+						if (titlestarted == inputStarted.started) {
 							title += " " + args[i];
 							if (args[i].endsWith("\"")) {
-								titlestarted = false;
+								titlestarted = inputStarted.finished;
 							}
 						}
 						if ((titlestarted == null) && (i < (args.length - 1))) {
@@ -676,7 +679,11 @@ public class OrdosName extends JavaPlugin implements Listener {
 						}
 					}
 				}
-				if ((titlestarted == false) && (title.length() > 2)) {
+				if (titlestarted == inputStarted.started) {
+					return false;
+					// if the input never finished, something went wrong.
+				}
+				if ((titlestarted == inputStarted.finished) && (title.length() >= 2)) {
 					// trim off the start and end speech marks
 					title = title.substring(2, title.length() - 1);
 				}
@@ -795,25 +802,30 @@ public class OrdosName extends JavaPlugin implements Listener {
 			} else {
 				String suffix = "";
 				String target = null;
-				// boolean object - null represents suffix not started, true suffix in progress, false suffix ended
-				Boolean suffixstarted = null;
+				// now an enum object to avoid NPEs.
+				inputStarted suffixstarted = inputStarted.never;
 				for (int i = 0; i < args.length; i++) {
 					if (target == null) {
 						if (args[i].startsWith("\"")) {
-							suffixstarted = true;
+							suffixstarted = inputStarted.started;
 						}
-						if (suffixstarted == true) {
+						if (suffixstarted == inputStarted.started) {
 							suffix += " " + args[i];
 							if (args[i].endsWith("\"")) {
-								suffixstarted = false;
+								suffixstarted = inputStarted.finished;
 							}
 						}
-						if ((suffixstarted == null) && (i < (args.length - 1))) {
+						// if the input has finished and the count var has reached the end of the args, set the title and end the loop.
+						if ((suffixstarted == inputStarted.finished) && (i < (args.length - 1))) {
 							target = args[i + 1];
 						}
 					}
 				}
-				if ((suffixstarted == false) && (suffix.length() > 2)) {
+				if (suffixstarted == inputStarted.started) {
+					return false;
+					// if the input never finished, something went wrong.
+				}
+				if ((suffixstarted == inputStarted.finished) && (suffix.length() >= 2)) {
 					// trim off the start and end speech marks
 					suffix = suffix.substring(2, suffix.length() - 1);
 				}
@@ -875,7 +887,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 								statement.executeUpdate("INSERT INTO " + dbTable + " (user, suffix, last, townysuffix, lastseen) VALUES ('" + target
 										+ "', '" + suffix + "', '" + target + "', FALSE, '" + timestamp + "');");
 								logger.info("Database entry was created for " + target);
-								
+
 							}
 							if (statement != null) {
 								statement.close();
@@ -894,7 +906,6 @@ public class OrdosName extends JavaPlugin implements Listener {
 
 		return false;
 	}
-	
 
 	private void dbcleanup() {
 		// sql query for datediff (much easier than doing so in-code)
