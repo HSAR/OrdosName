@@ -1059,29 +1059,35 @@ public class OrdosName extends JavaPlugin implements Listener {
 		// get timestamp for DB inserts
 		Object timestamp = new java.sql.Timestamp((new Date()).getTime());
 		String townname = null;
-		try {
+		try {		
+			// check whether the player is in a town - this avoids Towny throwing a NotRegisteredException when I try to get a non-existent town name
+			if (TownyUniverse.getDataSource().getResident(player.getName()).hasTown()) {
+				// if yes, set townname to whatever it should be
 			townname = TownyUniverse.getDataSource().getResident(player.getName()).getTown().getName();
-		} catch (Exception e) {
-			// if they aren't registered to a town, reset their suffix
-			if (verbose) {
-				logger.info("Player " + player.getName() + " does not belong to a town. Resetting suffix.");
-				try {
-					Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-					ResultSet RS = statement.executeQuery("SELECT suffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
-					if (!(RS == null) && (RS.first())) {
-						// if the user is already in the database, update their record
-						statement.executeUpdate("UPDATE " + dbTable + " SET suffix = '' WHERE user= '" + player.getName() + "';");
-					} else {
-						// if the user is not already in the database, insert a new record
-						statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
-								+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
-						logger.info("Database entry was created for " + player.getName());
+			} else {
+				// if they aren't registered to a town, reset their suffix
+				if (verbose) {
+					logger.info("Player " + player.getName() + " does not belong to a town. Resetting suffix.");
+					try {
+						Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+						ResultSet RS = statement.executeQuery("SELECT suffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
+						if (!(RS == null) && (RS.first())) {
+							// if the user is already in the database, update their record
+							statement.executeUpdate("UPDATE " + dbTable + " SET suffix = '' WHERE user= '" + player.getName() + "';");
+						} else {
+							// if the user is not already in the database, insert a new record
+							statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
+									+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
+							logger.info("Database entry was created for " + player.getName());
+						}
+					} catch (SQLException e1) {
+						e1.printStackTrace();
 					}
-				} catch (SQLException e1) {
-					e1.printStackTrace();
+					return;
 				}
-				return;
 			}
+		} catch (Exception e) {
+			e.printStackTrace();
 		}
 		// if the previous code returns a result, apply appropriate formatting.
 		if (townname != null) {
@@ -1120,6 +1126,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 				e.printStackTrace();
 			}
 		} else {
+			// if the townname returned was null (or if townname was never set, for whatever reason) go ahead and assume the player is not in a town
 			if (verbose) {
 				logger.info("Player " + player.getName() + " does not belong to a town. Resetting suffix.");
 				try {
@@ -1139,7 +1146,6 @@ public class OrdosName extends JavaPlugin implements Listener {
 				}
 				return;
 			}
-
 		}
 	}
 
