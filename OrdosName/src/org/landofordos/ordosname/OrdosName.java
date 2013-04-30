@@ -1225,7 +1225,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.MONITOR)
+	@EventHandler(priority = EventPriority.HIGHEST)
 	// EventPriority.NORMAL by default
 	public void onPlayerLogin(PlayerLoginEvent event) {
 		// get timestamp for DB inserts
