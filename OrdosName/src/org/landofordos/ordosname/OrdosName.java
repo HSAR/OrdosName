@@ -395,12 +395,12 @@ public class OrdosName extends JavaPlugin implements Listener {
 					sender.sendMessage("You cannot do this since you are not a player.");
 				} else {
 					if ((args.length == 0) || ((sender.getName().equals(args[0])) && (sender.hasPermission("ordosname.reload.self")))) {
-						reloadPlayerName(sender, sender.getName());
+						reloadPlayerName((Player) sender);
 						return true;
 					}
 				}
 				if ((sender.hasPermission("ordosname.reload.others")) && (args.length == 1)) {
-					reloadPlayerName(sender, args[0]);
+					reloadPlayerName(sender, server.getPlayer(args[0]));
 					return true;
 				}
 				return false;
@@ -513,7 +513,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
-						reloadPlayerName(sender, args[1]);
+						reloadPlayerName(sender, server.getPlayer(args[1]));
 						return true;
 					} else {
 						// "You don't have permission!"
@@ -631,7 +631,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						} catch (SQLException e) {
 							e.printStackTrace();
 						}
-						reloadPlayerName(sender, args[1]);
+						reloadPlayerName(sender, server.getPlayer(args[1]));
 						return true;
 					} else {
 						// "You don't have permission!"
@@ -949,17 +949,15 @@ public class OrdosName extends JavaPlugin implements Listener {
 		}
 	}
 
-	public void reloadPlayerName(CommandSender sender, String playername) {
+	public void reloadPlayerName(CommandSender sender, Player player) {
 		Statement statement;
 		try {
 			statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-			ResultSet RS = statement.executeQuery("SELECT * FROM " + dbTable + " WHERE user = '" + playername + "';");
+			ResultSet RS = statement.executeQuery("SELECT * FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
 			if (!(RS == null) && (RS.first())) {
 				if (!(RS.getBoolean("enabled"))) {
 					sender.sendMessage(ChatColor.RED + "Data was found, but ENABLED was flagged FALSE");
 				} else {
-					// if there's a result, set the player's name appropriately.
-					Player player = server.getPlayer(playername);
 					if (player == null) {
 						sender.sendMessage(ChatColor.RED + "Player is offline.");
 					} else {
@@ -997,14 +995,14 @@ public class OrdosName extends JavaPlugin implements Listener {
 							sender.sendMessage(ChatColor.RED + "Data was found, but all fields were NULL");
 						} else {
 							sender.sendMessage(ChatColor.RED + "Player " + player.getName() + "'s name set to " + name);
-							recordDisplayName(playername, name);
+							recordDisplayName(player.getName(), name);
 							player.setDisplayName(name);
 						}
 					}
 				}
 			} else {
 				// If no result was returned then the user has no record. Return an error.
-				sender.sendMessage(ChatColor.RED + "No data found for player " + playername);
+				sender.sendMessage(ChatColor.RED + "No data found for player " + player.getName());
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -1012,7 +1010,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 	}
 
 	public void reloadPlayerName(Player player) {
-		reloadPlayerName(player, player.getName());
+		reloadPlayerName(player, player);
 	}
 
 	public void reloadPlayerTownySuffix(Player player) {
@@ -1227,7 +1225,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 		}
 	}
 
-	@EventHandler(priority = EventPriority.HIGHEST)
+	@EventHandler(priority = EventPriority.MONITOR)
 	// EventPriority.NORMAL by default
 	public void onPlayerLogin(PlayerLoginEvent event) {
 		// get timestamp for DB inserts
@@ -1262,7 +1260,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 					logger.info("No townysuffix data found for player " + event.getPlayer().getName());
 				}
 			}
-			reloadPlayerName(player);
+			reloadPlayerName(server.getConsoleSender(), player);
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
