@@ -988,15 +988,13 @@ public class OrdosName extends JavaPlugin implements Listener {
 						if (suffix != null) {
 							name += suffix;
 						}
-						if (name.endsWith(" ")) {
-							name = name.substring(0, name.length() - 1);
-						}
+						name = name.trim();
 						if (name.length() < 1) {
 							sender.sendMessage(ChatColor.RED + "Data was found, but all fields were NULL");
 						} else {
 							sender.sendMessage(ChatColor.RED + "Player " + player.getName() + "'s name set to " + name);
 							recordDisplayName(player.getName(), name);
-							player.setDisplayName(name);
+							player.setDisplayName(name.trim());
 						}
 					}
 				}
