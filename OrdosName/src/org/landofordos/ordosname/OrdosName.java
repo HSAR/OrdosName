@@ -21,6 +21,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
 import com.palmergames.bukkit.towny.Towny;
+import com.palmergames.bukkit.towny.TownyFormatter;
 //import com.palmergames.bukkit.towny.exceptions.NotRegisteredException;
 import com.palmergames.bukkit.towny.object.TownyUniverse;
 
@@ -1124,14 +1125,15 @@ public class OrdosName extends JavaPlugin implements Listener {
 		Object timestamp = new java.sql.Timestamp((new Date()).getTime());
 		String towntitle = null;
 		try {
-			// check whether the player is in a town - this avoids Towny throwing a NotRegisteredException when I try to get a non-existent town name
-			if (TownyUniverse.getDataSource().getResident(player.getName()).hasTitle()) {
-				// if yes, set townname to whatever it should be
-				towntitle = TownyUniverse.getDataSource().getResident(player.getName()).getTitle();
+			// check whether the player has a town - avoids NPEs
+			if (TownyUniverse.getDataSource().getResident(player.getName()).hasTown()) {
+				// if yes, set title to whatever it should be
+				// NOTE: DO NOT USE Resident.getTitle() - that's not right
+				towntitle = TownyFormatter.getNamePrefix(TownyUniverse.getDataSource().getResident(player.getName()));
 			} else {
 				// if they aren't registered to a town, reset their suffix
 				if (verbose) {
-					logger.info("Player " + player.getName() + " does not belong to a town. Resetting title.");
+					logger.info("Player " + player.getName() + " has no title. Resetting title.");
 					try {
 						Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 						ResultSet RS = statement.executeQuery("SELECT title FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
@@ -1194,7 +1196,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 		} else {
 			// if the townname returned was null (or if townname was never set, for whatever reason) go ahead and assume the player is not in a town
 			if (verbose) {
-				logger.info("Player " + player.getName() + " does not belong to a town. Resetting title.");
+				logger.info("Player " + player.getName() + "'s title returned NULL. Resetting title.");
 				try {
 					Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
 					ResultSet RS = statement.executeQuery("SELECT suffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
