@@ -1126,6 +1126,9 @@ public class OrdosName extends JavaPlugin implements Listener {
 				// if yes, set title to whatever it should be
 				// NOTE: DO NOT USE Resident.getTitle() - that's not right
 				towntitle = TownyFormatter.getNamePrefix(TownyUniverse.getDataSource().getResident(player.getName()));
+				if (towntitle.trim().length() < 1) {
+					towntitle = null;
+				}
 			} else {
 				// if they aren't registered to a town, reset their suffix
 				if (verbose) {
