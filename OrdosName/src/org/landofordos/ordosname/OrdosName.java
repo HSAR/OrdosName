@@ -127,7 +127,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 		try {
 			statement.executeUpdate("CREATE TABLE " + dbTable + " (user VARCHAR( 32 )  NOT NULL UNIQUE PRIMARY KEY, first VARCHAR( 32 ), "
 					+ "last VARCHAR( 32 ), title VARCHAR( 32 ), suffix VARCHAR( 32 ), titleoverridesfirst BIT DEFAULT FALSE, "
-					+ "townysuffix BIT NOT NULL, enabled BIT DEFAULT TRUE, displayname VARCHAR( 128 ), lastseen DATETIME NOT NULL);");
+					+ "townytitle BIT DEFAULT FALSE, townysuffix BIT DEFAULT FALSE, enabled BIT DEFAULT TRUE, displayname VARCHAR( 128 ), "
+					+ "lastseen DATETIME NOT NULL);");
 		} catch (SQLException e) {
 			logger.info(" SQL Exception: " + e);
 			return false;
@@ -340,8 +341,9 @@ public class OrdosName extends JavaPlugin implements Listener {
 									} else {
 										// If no result was returned then the user has not been added before.
 										// Use INSERT instead of update to create the record
-										statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('"
-												+ sender.getName() + "', '" + sender.getName() + "', TRUE, '" + timestamp + "');");
+										statement.executeUpdate("INSERT INTO " + dbTable
+												+ " (user, last, townytitle, townysuffix, lastseen) VALUES ('" + sender.getName() + "', '"
+												+ sender.getName() + "', TRUE, TRUE, '" + timestamp + "');");
 										logger.info("Database entry was created for " + sender.getName());
 									}
 									if (statement != null) {
@@ -364,8 +366,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 								} else {
 									// If no result was returned then the user has not been added before.
 									// Use INSERT instead of update to create the record
-									statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('" + args[1]
-											+ "', '" + args[1] + "', TRUE, '" + timestamp + "');");
+									statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townytitle, townysuffix, lastseen) VALUES ('"
+											+ args[1] + "', '" + args[1] + "', TRUE, TRUE, '" + timestamp + "');");
 									logger.info("Database entry was created for " + args[1]);
 								}
 								if (statement != null) {
@@ -425,8 +427,9 @@ public class OrdosName extends JavaPlugin implements Listener {
 							} else {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record
-								statement.executeUpdate("INSERT INTO " + dbTable + " (user, first, last, townysuffix, lastseen) VALUES ('"
-										+ sender.getName() + "', NULL, '" + sender.getName() + "', '" + useTowny + ", '" + timestamp + "');");
+								statement.executeUpdate("INSERT INTO " + dbTable
+										+ " (user, first, last, townytitle, townysuffix, lastseen) VALUES ('" + sender.getName() + "', NULL, '"
+										+ sender.getName() + "', '" + useTowny + ", " + useTowny + ", '" + timestamp + "');");
 								logger.info("Database entry was created for " + sender.getName());
 							}
 							if (statement != null) {
@@ -462,8 +465,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 								} else {
 									// If no result was returned then the user has not been added before.
 									// Use INSERT instead of update to create the record.
-									statement.executeUpdate("INSERT INTO " + dbTable + " (user, first, townysuffix, lastseen) VALUES ('"
-											+ sender.getName() + "', '" + args[0] + "', " + useTowny + ", '" + timestamp + "');");
+									statement.executeUpdate("INSERT INTO " + dbTable + " (user, first, townytitle, townysuffix, lastseen) VALUES ('"
+											+ sender.getName() + "', '" + args[0] + "', " + useTowny + ", " + useTowny + ", '" + timestamp + "');");
 									logger.info("Database entry was created for " + sender.getName());
 								}
 								if (statement != null) {
@@ -499,8 +502,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 							} else {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record.
-								statement.executeUpdate("INSERT INTO " + dbTable + " (user, first, townysuffix, lastseen) VALUES ('" + args[1]
-										+ "', " + name + ", " + useTowny + ", '" + timestamp + "');");
+								statement.executeUpdate("INSERT INTO " + dbTable + " (user, first, townytitle, townysuffix, lastseen) VALUES ('"
+										+ args[1] + "', " + name + ", " + useTowny + ", " + useTowny + ", '" + timestamp + "');");
 								logger.info("Database entry was created for " + args[1]);
 							}
 							if (statement != null) {
@@ -541,8 +544,9 @@ public class OrdosName extends JavaPlugin implements Listener {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record
 								// since the last name of a player is never null, we set it to their actual username instead
-								statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('"
-										+ sender.getName() + "', '" + sender.getName() + "', " + useTowny + ", '" + timestamp + "');");
+								statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townytitle, townysuffix, lastseen) VALUES ('"
+										+ sender.getName() + "', '" + sender.getName() + "', " + useTowny + ", " + useTowny + ", '" + timestamp
+										+ "');");
 								logger.info("Database entry was created for " + sender.getName());
 							}
 							if (statement != null) {
@@ -578,8 +582,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 								} else {
 									// If no result was returned then the user has not been added before.
 									// Use INSERT instead of update to create the record.
-									statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('"
-											+ sender.getName() + "', '" + args[0] + "', " + useTowny + ", '" + timestamp + "');");
+									statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townytitle, townysuffix, lastseen) VALUES ('"
+											+ sender.getName() + "', '" + args[0] + "', " + useTowny + ", '" + useTowny + ", '" + timestamp + "');");
 									logger.info("Database entry was created for " + sender.getName());
 								}
 								if (statement != null) {
@@ -602,7 +606,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 						String name;
 						if (args[0].equals("\"\"")) {
 							// if trying to clear their last name, reset it to their username.
-							name = "'"+args[1]+"'";
+							name = "'" + args[1] + "'";
 						} else {
 							name = "'" + args[0] + "'";
 						}
@@ -616,8 +620,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 							} else {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record.
-								statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('" + args[1]
-										+ "', " + name + ", " + useTowny + ", '" + timestamp + "');");
+								statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townytitle, townysuffix, lastseen) VALUES ('"
+										+ args[1] + "', " + name + ", " + useTowny + ", '" + useTowny + ", '" + timestamp + "');");
 								logger.info("Database entry was created for " + args[1]);
 							}
 							if (statement != null) {
@@ -651,13 +655,14 @@ public class OrdosName extends JavaPlugin implements Listener {
 							ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE user = '" + sender.getName() + "';");
 							if (!(tryRS == null) && (tryRS.first())) {
 								// if there's a result, update the table instead of inserting.
-								statement.executeUpdate("UPDATE " + dbTable + " SET title = NULL, titleoverridesfirst = FALSE, lastseen = '"
-										+ timestamp + "' WHERE user= '" + sender.getName() + "';");
+								statement.executeUpdate("UPDATE " + dbTable + " SET title = NULL, titleoverridesfirst = FALSE, "
+										+ "townytitle = FALSE, lastseen = '" + timestamp + "' WHERE user= '" + sender.getName() + "';");
 							} else {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record
-								statement.executeUpdate("INSERT INTO " + dbTable + " (user, title, titleoverridesfirst, last, lastseen) VALUES ('"
-										+ sender.getName() + "', NULL, FALSE, '" + sender.getName() + "', '" + timestamp + "');");
+								statement.executeUpdate("INSERT INTO " + dbTable
+										+ " (user, title, titleoverridesfirst, townytitle, last, lastseen) VALUES ('" + sender.getName()
+										+ "', NULL, FALSE, FALSE, '" + sender.getName() + "', '" + timestamp + "');");
 								logger.info("Database entry was created for " + sender.getName());
 							}
 							if (statement != null) {
@@ -723,8 +728,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 								ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE user = '" + sender.getName() + "';");
 								if (!(tryRS == null) && (tryRS.first())) {
 									// if there's a result, update the table instead of inserting.
-									statement.executeUpdate("UPDATE " + dbTable + " SET title = '" + title + "', lastseen = '" + timestamp
-											+ "' WHERE user= '" + sender.getName() + "';");
+									statement.executeUpdate("UPDATE " + dbTable + " SET title = '" + title + "', townytitle = FALSE, lastseen = '"
+											+ timestamp + "' WHERE user= '" + sender.getName() + "';");
 								} else {
 									// If no result was returned then the user has not been added before.
 									// Use INSERT instead of update to create the record.
@@ -752,8 +757,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 							ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE user = '" + target + "';");
 							if (!(tryRS == null) && (tryRS.first())) {
 								// if there's a result, update the table instead of inserting.
-								statement.executeUpdate("UPDATE " + dbTable + " SET title = '" + title + "', lastseen = '" + timestamp
-										+ "' WHERE user= '" + target + "';");
+								statement.executeUpdate("UPDATE " + dbTable + " SET title = '" + title + "', townytitle = FALSE, lastseen = '"
+										+ timestamp + "' WHERE user= '" + target + "';");
 							} else {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record.
@@ -797,8 +802,9 @@ public class OrdosName extends JavaPlugin implements Listener {
 							} else {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record
-								statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('"
-										+ sender.getName() + "', '" + sender.getName() + "', FALSE, '" + timestamp + "');");
+								statement.executeUpdate("INSERT INTO " + dbTable
+										+ " (user, last, suffix, townytitle, townysuffix, lastseen) VALUES ('" + sender.getName() + "', '"
+										+ sender.getName() + "', FALSE, FALSE, '" + timestamp + "');");
 								logger.info("Database entry was created for " + sender.getName());
 							}
 							if (statement != null) {
@@ -870,8 +876,9 @@ public class OrdosName extends JavaPlugin implements Listener {
 								} else {
 									// If no result was returned then the user has not been added before.
 									// Use INSERT instead of update to create the record.
-									statement.executeUpdate("INSERT INTO " + dbTable + " (user, suffix, last, townysuffix, lastseen) VALUES ('"
-											+ sender.getName() + "', '" + suffix + "', '" + sender.getName() + "', FALSE, '" + timestamp + "');");
+									statement.executeUpdate("INSERT INTO " + dbTable
+											+ " (user, suffix, last, townytitle, townysuffix, lastseen) VALUES ('" + sender.getName() + "', '"
+											+ suffix + "', '" + sender.getName() + "', FALSE, FALSE, '" + timestamp + "');");
 									logger.info("Database entry was created for " + sender.getName());
 								}
 								if (statement != null) {
@@ -899,8 +906,9 @@ public class OrdosName extends JavaPlugin implements Listener {
 							} else {
 								// If no result was returned then the user has not been added before.
 								// Use INSERT instead of update to create the record.
-								statement.executeUpdate("INSERT INTO " + dbTable + " (user, suffix, last, townysuffix, lastseen) VALUES ('" + target
-										+ "', '" + suffix + "', '" + target + "', FALSE, '" + timestamp + "');");
+								statement.executeUpdate("INSERT INTO " + dbTable
+										+ " (user, suffix, last, townytitle, townysuffix, lastseen) VALUES ('" + target + "', '" + suffix + "', '"
+										+ target + "', FALSE, FALSE, '" + timestamp + "');");
 								logger.info("Database entry was created for " + target);
 
 							}
@@ -1003,67 +1011,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 	}
 
 	public void reloadPlayerName(Player player) {
-		try {
-			Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
-			ResultSet RS = statement.executeQuery("SELECT * FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
-			if (!(RS == null) && (RS.first())) {
-				if (!(RS.getBoolean("enabled"))) {
-					if (verbose) {
-						logger.info(ChatColor.RED + "Data was found, but ENABLED was flagged FALSE");
-					}
-				} else {
-					// if there's a result, set the player's name appropriately.
-					// fetch name objects and append appropriate spacing
-					String title = RS.getString("title");
-					String last = RS.getString("last");
-					String suffix = RS.getString("suffix");
-					String first;
-					// does the player's title override their first name, and do they have a title?
-					if ((title != null) && (RS.getBoolean("titleoverridesfirst"))) {
-						// if so, we won't be needing firstname.
-						first = null;
-					} else {
-						// if not, we'll need to fetch their first name
-						first = RS.getString("first");
-					}
-					// string of final name to be set
-					String name = "";
-					if (title != null) {
-						name += title + " ";
-					}
-					if (first != null) {
-						name += first + " ";
-					}
-					if (last != null) {
-						name += last + " ";
-					}
-					if (suffix != null) {
-						name += suffix;
-					}
-					if (name.endsWith(" ")) {
-						name = name.substring(0, name.length() - 1);
-					}
-					if (name.length() < 1) {
-						if (verbose) {
-							logger.info("Data was found, but all fields were NULL");
-						}
-					} else {
-						if (verbose) {
-							logger.info("Player " + player.getName() + "'s name set to " + name);
-						}
-						player.setDisplayName(name);
-						recordDisplayName(player.getName(), name);
-					}
-				}
-			} else {
-				if (verbose) {
-					// If no result was returned then the user has no record. Return an error.
-					logger.info("No data found for player " + player.getName());
-				}
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
+		reloadPlayerName(player, player.getName());
 	}
 
 	public void reloadPlayerTownySuffix(Player player) {
@@ -1091,10 +1039,9 @@ public class OrdosName extends JavaPlugin implements Listener {
 							statement.executeUpdate("UPDATE " + dbTable + " SET suffix = '' WHERE user= '" + player.getName() + "';");
 						} else {
 							// if the user is not already in the database, insert a new record
-							statement
-									.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('"
-											+ player.getName() + "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp
-											+ "');");
+							statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townytitle, townysuffix, lastseen) VALUES ('"
+									+ player.getName() + "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", " + useTowny + ", '"
+									+ timestamp + "');");
 							logger.info("Database entry was created for " + player.getName());
 						}
 					} catch (SQLException e1) {
@@ -1135,8 +1082,9 @@ public class OrdosName extends JavaPlugin implements Listener {
 					}
 				} else {
 					// if the user is not already in the database, insert a new record with their username (so that the suffix doesn't look stupid)
-					statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
-							+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
+					statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townytitle, townysuffix, lastseen) VALUES ('"
+							+ player.getName() + "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", " + useTowny + ", '"
+							+ timestamp + "');");
 					logger.info("Database entry was created for " + player.getName());
 				}
 			} catch (SQLException e) {
@@ -1151,11 +1099,113 @@ public class OrdosName extends JavaPlugin implements Listener {
 					ResultSet RS = statement.executeQuery("SELECT suffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
 					if (!(RS == null) && (RS.first())) {
 						// if the user is already in the database, update their record
-						statement.executeUpdate("UPDATE " + dbTable + " SET suffix = '' WHERE user= '" + player.getName() + "';");
+						statement.executeUpdate("UPDATE " + dbTable + " SET suffix = NULL WHERE user= '" + player.getName() + "';");
 					} else {
 						// if the user is not already in the database, insert a new record
-						statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townysuffix, lastseen) VALUES ('" + player.getName()
-								+ "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", '" + timestamp + "');");
+						statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townytitle, townysuffix, lastseen) VALUES ('"
+								+ player.getName() + "', '" + player.getName() + "', '" + townname + "', " + useTowny + ", " + useTowny + ", '"
+								+ timestamp + "');");
+						logger.info("Database entry was created for " + player.getName());
+					}
+				} catch (SQLException e1) {
+					e1.printStackTrace();
+				}
+				return;
+			}
+		}
+	}
+
+	public void reloadPlayerTownyTitle(Player player) {
+		// this method generates and applies a title to a player based on what town they are in.
+		// it assumes that useTowny is TRUE and thus that towny is a valid instance of the Towny plugin, and that the player has townysuffix TRUE.
+		// try and fetch the name of the town this player is in
+		// -----------
+		// get timestamp for DB inserts
+		Object timestamp = new java.sql.Timestamp((new Date()).getTime());
+		String towntitle = null;
+		try {
+			// check whether the player is in a town - this avoids Towny throwing a NotRegisteredException when I try to get a non-existent town name
+			if (TownyUniverse.getDataSource().getResident(player.getName()).hasTitle()) {
+				// if yes, set townname to whatever it should be
+				towntitle = TownyUniverse.getDataSource().getResident(player.getName()).getTitle();
+			} else {
+				// if they aren't registered to a town, reset their suffix
+				if (verbose) {
+					logger.info("Player " + player.getName() + " does not belong to a town. Resetting title.");
+					try {
+						Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+						ResultSet RS = statement.executeQuery("SELECT suffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
+						if (!(RS == null) && (RS.first())) {
+							// if the user is already in the database, update their record
+							statement.executeUpdate("UPDATE " + dbTable + " SET suffix = '' WHERE user= '" + player.getName() + "';");
+						} else {
+							// if the user is not already in the database, insert a new record
+							statement.executeQuery("INSERT INTO " + dbTable + " (user, last, title, townytitle, townysuffix, lastseen) VALUES ('"
+									+ player.getName() + "', '" + player.getName() + "', '" + towntitle + "', " + useTowny + ", " + useTowny + ", '"
+									+ timestamp + "');");
+							logger.info("Database entry was created for " + player.getName());
+						}
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}
+					return;
+				}
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		// if the previous code returns a result, apply appropriate formatting.
+		if (towntitle != null) {
+			towntitle = towntitle + " ";
+			// then query for their previous suffix - if it is different, then update the record
+			try {
+				Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+				ResultSet RS = statement.executeQuery("SELECT suffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
+				// check to see if data has changed
+				if (!(RS == null) && (RS.first())) {
+					// if the user is already in the database, update their suffix if it differs.
+					String recordedSuffix = RS.getString("suffix");
+					if (RS.wasNull()) {
+						recordedSuffix = "";
+					}
+					if ((recordedSuffix.equals("")) || (!(recordedSuffix.equals(towntitle)))) {
+						if (verbose) {
+							logger.info("Assigning new title '" + towntitle + "' to player " + player.getName());
+						}
+						statement.executeUpdate("UPDATE " + dbTable + " SET title = '" + towntitle + "' WHERE user= '" + player.getName() + "';");
+						return;
+					} else {
+						// if they don't differ then nothing else is required.
+						if (verbose) {
+							logger.info("Attempted to add title to player " + player.getName() + " but their title is already correct.");
+							return;
+						}
+					}
+				} else {
+					// if the user is not already in the database, insert a new record with their username (so that the suffix doesn't look stupid)
+					statement.executeQuery("INSERT INTO " + dbTable + " (user, last, suffix, townytitle, townysuffix, lastseen) VALUES ('"
+							+ player.getName() + "', '" + player.getName() + "', '" + towntitle + "', " + useTowny + ", " + useTowny + ", '"
+							+ timestamp + "');");
+					logger.info("Database entry was created for " + player.getName());
+				}
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		} else {
+			// if the townname returned was null (or if townname was never set, for whatever reason) go ahead and assume the player is not in a town
+			if (verbose) {
+				logger.info("Player " + player.getName() + " does not belong to a town. Resetting title.");
+				try {
+					Statement statement = connection.createStatement(ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+					ResultSet RS = statement.executeQuery("SELECT suffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
+					if (!(RS == null) && (RS.first())) {
+						// if the user is already in the database, update their record
+						statement.executeUpdate("UPDATE " + dbTable + " SET title = NULL WHERE user= '" + player.getName() + "';");
+					} else {
+						// if the user is not already in the database, insert a new record
+						statement.executeQuery("INSERT INTO " + dbTable + " (user, last, title, townytitle, townysuffix, lastseen) VALUES ('"
+								+ player.getName() + "', '" + player.getName() + "', '" + towntitle + "', " + useTowny + ", " + useTowny + ", '"
+								+ timestamp + "');");
 						logger.info("Database entry was created for " + player.getName());
 					}
 				} catch (SQLException e1) {
@@ -1191,17 +1241,20 @@ public class OrdosName extends JavaPlugin implements Listener {
 				statement.executeUpdate("UPDATE " + dbTable + " SET lastseen = '" + timestamp + "' WHERE user= '" + player.getName() + "';");
 			} else {
 				// if the user is not already in the database, insert a new record with their username (so that suffixes and titles don't look stupid)
-				statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townysuffix, lastseen) VALUES ('" + player.getName() + "', '"
-						+ player.getName() + "', " + useTowny + ", '" + timestamp + "');");
+				statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, townytitle, townysuffix, lastseen) VALUES ('" + player.getName()
+						+ "', '" + player.getName() + "', " + useTowny + ", " + useTowny + ", '" + timestamp + "');");
 				logger.info("Database entry was created for " + player.getName());
 			}
 			// if towny integration enabled AND townysuffix enabled, check for the town they belong to and add the suffix
 			if (useTowny) {
 				// reload the resultset to look for changes
-				tryRS = statement.executeQuery("SELECT townysuffix FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
+				tryRS = statement.executeQuery("SELECT townysuffix, townytitle FROM " + dbTable + " WHERE user = '" + player.getName() + "';");
 				if (!(tryRS == null) && (tryRS.first())) {
 					if (tryRS.getBoolean("townysuffix")) {
 						reloadPlayerTownySuffix(event.getPlayer());
+					}
+					if (tryRS.getBoolean("townytitle")) {
+						reloadPlayerTownyTitle(event.getPlayer());
 					}
 				} else {
 					logger.info("No townysuffix data found for player " + event.getPlayer().getName());
