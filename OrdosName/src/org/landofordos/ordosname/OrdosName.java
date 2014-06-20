@@ -8,6 +8,7 @@ import java.sql.Statement;
 //import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.logging.Logger;
+
 import org.bukkit.ChatColor;
 import org.bukkit.Server;
 import org.bukkit.command.Command;
@@ -153,7 +154,8 @@ public class OrdosName extends JavaPlugin implements Listener {
 		return -1;
 	}
 
-	public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
+	@SuppressWarnings("deprecation")
+    public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, String[] args) {
 		// get timestamp for DB inserts
 		Object timestamp = new java.sql.Timestamp((new Date()).getTime());
 		// String timestamp = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
@@ -958,9 +960,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 				if (!(RS.getBoolean("enabled"))) {
 					sender.sendMessage(ChatColor.RED + "Data was found, but ENABLED was flagged FALSE");
 				} else {
-					if (player == null) {
-						sender.sendMessage(ChatColor.RED + "Player is offline.");
-					} else {
+					if (player != null) {
 						// fetch name objects and append appropriate spacing
 						String title = RS.getString("title");
 						String last = RS.getString("last");
