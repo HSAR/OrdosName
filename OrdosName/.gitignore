@@ -1,1 +1,14 @@
+*.class
+
+# Package Files #
+*.war
+*.ear
+
+# Eclipse Project Files #
+.project
+.classpath
+.settings
+/bin
+
+
 config.yml
