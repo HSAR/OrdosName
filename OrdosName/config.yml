@@ -1,0 +1,24 @@
+pluginvars:
+  # For configuration use only.
+  firstrun: true
+  # Verbose logging?
+  verboselogging: false
+  # Enable/disable plugin effects. 
+  enabled: true
+  # Enable logging to seperate log file.
+  logtofile: true
+  # Time (in days) before entries are eligible to be dropped from the database (default 1 month, 0 sets never)
+  dbcleanuptime: 30
+  # Towny integration
+  usetowny: false
+dbvars:
+  # Database system. Available options: "SQL" or "SQLite"
+  database: 'SQLite'
+  # URL to SQL server, if in use. Must start with 'mysql://'
+  URL: ''
+  # Username for secure SQL access.
+  Username: ''
+  # Password for secure SQL access.
+  Password: ''
+  # Table name to store OrdosName data.
+  tablename: 'OrdosName'
