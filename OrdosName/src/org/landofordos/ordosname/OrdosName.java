@@ -1507,7 +1507,7 @@ public class OrdosName extends JavaPlugin implements Listener {
 
     public static ProtectedRegion getTopLevelRegion(ProtectedRegion region) {
         // traverses up to find the region with no parents
-        if (region.getParent() != null) {
+        if (region.getParent() == null) {
             return region;
         } else {
             return getTopLevelRegion(region.getParent());

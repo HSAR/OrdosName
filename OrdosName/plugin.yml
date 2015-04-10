@@ -1,6 +1,6 @@
 name: OrdosName
 main: org.landofordos.ordosname.OrdosName
-version: 0.6
+version: 0.7
 softdepend: [Towny, WorldGuard]
 commands:
     ordosname:
