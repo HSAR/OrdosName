@@ -10,7 +10,9 @@ pluginvars:
   # Time (in days) before entries are eligible to be dropped from the database (default 1 month, 0 sets never)
   dbcleanuptime: 30
   # Towny integration
-  usetowny: false
+  useTowny: false
+  # WorldGuard integration
+  useWorldGuard: false
 dbvars:
   # Database system. Available options: "SQL" or "SQLite"
   database: 'SQLite'
