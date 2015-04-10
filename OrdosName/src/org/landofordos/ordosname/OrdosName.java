@@ -113,7 +113,7 @@ public class OrdosName extends JavaPlugin implements Listener {
         return true;
     }
 
-    private void connectSQL() throws SQLException, ClassNotFoundException {
+    private void connectMySQL() throws SQLException, ClassNotFoundException {
         Class.forName("com.mysql.jdbc.Driver");
         connection = DriverManager.getConnection("jdbc:" + URL + "?user=" + dbUser + "&password=" + dbPass);
     }
@@ -167,6 +167,7 @@ public class OrdosName extends JavaPlugin implements Listener {
         }
         // Check the database type. This cannot be changed while running, for obvious reasons.
         // Check that no connection has yet been started. If so, load variables.
+        logger.info("Establishing connection to database...");
         if (connection == null && dbType == null) {
             dbType = config.getString("dbvars.database");
             // create database connection - at this time, only SQL and SQLite and supported.
@@ -175,8 +176,8 @@ public class OrdosName extends JavaPlugin implements Listener {
                 case "SQLite":
                     connectSQLite();
                     break;
-                case "SQL":
-                    connectSQL();
+                case "MySQL":
+                    connectMySQL();
                     break;
                 default:
                     break;
@@ -193,6 +194,7 @@ public class OrdosName extends JavaPlugin implements Listener {
         }
         // if connection is not available after initialisation attempt, unload plugin
         if (connection == null) {
+            logger.log(Level.SEVERE, "Database connection failed - this is a fatal error.");
             getServer().getPluginManager().disablePlugin(this);
             return false;
         }
@@ -229,39 +231,35 @@ public class OrdosName extends JavaPlugin implements Listener {
             }
         }
         // check for Towny integration, and if so open towny plugin object - if not found, disable the feature
-        if (useTowny != config.getBoolean("pluginvars.useTowny")) {
-            useTowny = config.getBoolean("pluginvars.useTowny");
-            if (useTowny) {
-                Plugin plugin = getServer().getPluginManager().getPlugin("Towny");
-                if (plugin == null || !(plugin instanceof Towny)) {
-                    logger.severe("Towny integration was enabled, but Towny could not be found!");
-                    sender.sendMessage(ChatColor.RED + "Towny integration enabled, but the plugin was not found!");
-                    // the feature is nonessential, so disable it and continue running the plugin.
-                    useTowny = false;
-                } else {
-                    // cast type
-                    towny = (Towny) plugin;
-                    townyUniverse = towny.getTownyUniverse();
-                    logger.info("Towny integration now enabled.");
-                }
+        useTowny = config.getBoolean("pluginvars.useTowny");
+        if (useTowny) {
+            Plugin plugin = getServer().getPluginManager().getPlugin("Towny");
+            if (plugin == null || !(plugin instanceof Towny)) {
+                logger.severe("Towny integration was enabled, but Towny could not be found!");
+                sender.sendMessage(ChatColor.RED + "Towny integration enabled, but the plugin was not found!");
+                // the feature is nonessential, so disable it and continue running the plugin.
+                useTowny = false;
+            } else {
+                // cast type
+                towny = (Towny) plugin;
+                townyUniverse = towny.getTownyUniverse();
+                logger.info("Towny integration now enabled.");
             }
-
         }
+            
         // check for WorldGuard integration, and if so open WG plugin object - if not found, disable the feature
-        if (useWorldGuard != config.getBoolean("pluginvars.useWorldGuard")) {
-            useWorldGuard = config.getBoolean("pluginvars.useWorldGuard");
-            if (useWorldGuard) {
-                Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
-                if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
-                    logger.severe("WG integration was enabled, but WG could not be found!");
-                    sender.sendMessage(ChatColor.RED + "WG integration enabled, but the plugin was not found!");
-                    // the feature is nonessential, so disable it and continue running the plugin.
-                    useWorldGuard = false;
-                } else {
-                    // cast type
-                    worldGuard = (WorldGuardPlugin) plugin;
-                    logger.info("WorldGuard integration now enabled.");
-                }
+        useWorldGuard = config.getBoolean("pluginvars.useWorldGuard");
+        if (useWorldGuard) {
+            Plugin plugin = getServer().getPluginManager().getPlugin("WorldGuard");
+            if (plugin == null || !(plugin instanceof WorldGuardPlugin)) {
+                logger.severe("WG integration was enabled, but WG could not be found!");
+                sender.sendMessage(ChatColor.RED + "WG integration enabled, but the plugin was not found!");
+                // the feature is nonessential, so disable it and continue running the plugin.
+                useWorldGuard = false;
+            } else {
+                // cast type
+                worldGuard = (WorldGuardPlugin) plugin;
+                logger.info("WorldGuard integration now enabled.");
             }
         }
         return true;
@@ -1043,6 +1041,16 @@ public class OrdosName extends JavaPlugin implements Listener {
     }
 
     public void reloadPlayerName(CommandSender sender, Player player) {
+        // use WG integration
+        if (useWorldGuard) {
+            reloadPlayerWGSuffix(player);
+        }
+        // use Towny integration
+        if (useTowny) {
+            reloadPlayerTownySuffix(player);
+            reloadPlayerTownyTitle(player);
+        }
+        
         Statement statement;
         try {
             statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -1401,6 +1409,8 @@ public class OrdosName extends JavaPlugin implements Listener {
                 }
                 return;
             }
+        } else {
+            logger.info("Found " + parentCount.size() + " regions owned by player " + player.getName());
         }
 
         // Now run a second pass to find the most common top-level region
@@ -1489,15 +1499,6 @@ public class OrdosName extends JavaPlugin implements Listener {
                 statement.executeUpdate("INSERT INTO " + dbTable + " (user, last, lastseen) VALUES ('"
                         + player.getUniqueId() + "', '" + player.getName() + "', '" + timestamp + "');");
                 logger.info("Database entry was created for " + player.getName());
-            }
-            // use WG integration
-            if (useWorldGuard) {
-                reloadPlayerWGSuffix(event.getPlayer());
-            }
-            // use Towny integration
-            if (useTowny) {
-                reloadPlayerTownySuffix(event.getPlayer());
-                reloadPlayerTownyTitle(event.getPlayer());
             }
             reloadPlayerName(server.getConsoleSender(), player);
         } catch (SQLException e) {
