@@ -334,6 +334,7 @@ public class OrdosName extends JavaPlugin implements Listener {
                         ResultSet RS = statement
                                 .executeQuery("SELECT * FROM " + dbTable + " WHERE user = '" + playerUUID.toString() + "';");
                         if (RS.isBeforeFirst()) {
+                            RS.next();
                             if (!(RS.getBoolean("enabled"))) {
                                 if (verbose) {
                                     sender.sendMessage("");
@@ -387,6 +388,7 @@ public class OrdosName extends JavaPlugin implements Listener {
                         ResultSet tryRS = statement.executeQuery("SELECT user FROM " + dbTable + " WHERE displayname = '" + nameToCheck
                                 + "';");
                         if (tryRS.isBeforeFirst()) {
+                            tryRS.next();
                             sender.sendMessage(ChatColor.DARK_GREEN + "The username of " + ChatColor.WHITE + nameToCheck
                                     + ChatColor.DARK_GREEN + " is " + ChatColor.WHITE
                                     + server.getPlayer(UUID.fromString(tryRS.getString("user"))));
@@ -695,7 +697,7 @@ public class OrdosName extends JavaPlugin implements Listener {
                             return true;
                         } else {
                             // No player found!
-                            sender.sendMessage(Color.RED + "No player found with name " + args[1]);
+                            sender.sendMessage(ChatColor.RED + "No player found with name " + args[1]);
                         }
                     } else {
                         // "You don't have permission!"
@@ -902,32 +904,33 @@ public class OrdosName extends JavaPlugin implements Listener {
                 inputStarted suffixstarted = inputStarted.never;
                 for (int i = 0; i < args.length; i++) {
                     if (target == null) {
-                        if (args[i].startsWith("\"")) {
+                        if (args[i].startsWith("\"") && suffixstarted == inputStarted.never) {
                             suffixstarted = inputStarted.started;
-                        }
-                        if (suffixstarted == inputStarted.started) {
+                            suffix = args[i];
+                        } else if (suffixstarted == inputStarted.started) {
                             suffix += " " + args[i];
                             if (args[i].endsWith("\"")) {
                                 suffixstarted = inputStarted.finished;
                             }
                         }
-                        // if the input has finished and the count var has reached the end of the args, set the title
-                        // and end the loop.
-                        if ((suffixstarted == inputStarted.finished) && (i < (args.length - 1))) {
-                            target = args[i + 1];
-                        }
+                    }
+                    // if the input has finished and the count var has reached the end of the args, set the title
+                    // and end the loop.
+                    if ((suffixstarted == inputStarted.finished) && (i < (args.length - 1))) {
+                        target = args[i + 1];
                     }
                 }
                 if (suffixstarted == inputStarted.started) {
                     return false;
                     // if the input never finished, something went wrong.
-                }
-                if ((suffixstarted == inputStarted.finished) && (suffix.length() >= 2)) {
+                } else if ((suffixstarted == inputStarted.finished) && (suffix.length() >= 2)) {
                     // trim off the start and end speech marks
-                    suffix = suffix.substring(2, suffix.length() - 1);
-                }
-                // if the suffix never started, assume single word suffix and pick a target if it was specified.
-                if (suffixstarted == inputStarted.never) {
+                    suffix = suffix.substring(1, suffix.length() - 1);
+                    if (verbose) {
+                        logger.info(sender.getName() + " attempted to set a suffix to '" + suffix + "'");
+                    }
+                } else if (suffixstarted == inputStarted.never) {
+                    // if the suffix never started, assume single word suffix and pick a target if it was specified.
                     suffix = args[0];
                     if (args.length > 1) {
                         target = args[1];
@@ -1001,7 +1004,7 @@ public class OrdosName extends JavaPlugin implements Listener {
                             reloadPlayerName(server.getPlayer(target));
                             return true;
                         } else {
-                            sender.sendMessage(Color.RED + "No player found with name " + target);
+                            sender.sendMessage(ChatColor.RED + "No player found with name " + target);
                         }
                     } else {
                         // "You don't have permission!"
@@ -1056,6 +1059,7 @@ public class OrdosName extends JavaPlugin implements Listener {
             statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
             ResultSet RS = statement.executeQuery("SELECT * FROM " + dbTable + " WHERE user = '" + player.getUniqueId().toString() + "';");
             if (RS.isBeforeFirst()) {
+                RS.next();
                 if (!(RS.getBoolean("enabled"))) {
                     sender.sendMessage(ChatColor.RED + "Data was found, but ENABLED was flagged FALSE");
                 } else {
@@ -1096,7 +1100,7 @@ public class OrdosName extends JavaPlugin implements Listener {
                         }
                         
                         if (last != null) {
-                            name += last + " ";
+                            name += last;
                         }
                         
                         // having a suffix set overrides towny suffix
@@ -1176,7 +1180,7 @@ public class OrdosName extends JavaPlugin implements Listener {
         }
         // if the previous code returns a result, apply appropriate formatting.
         if (townname != null) {
-            townname = "of " + townname;
+            townname = " of " + townname;
             // then query for their previous suffix - if it is different, then update the record
             try {
                 Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -1184,6 +1188,7 @@ public class OrdosName extends JavaPlugin implements Listener {
                         + "';");
                 // check to see if data has changed
                 if (RS.isBeforeFirst()) {
+                    RS.next();
                     // if the user is already in the database, update their suffix if it differs.
                     String recordedSuffix = RS.getString("townysuffix");
                     if (RS.wasNull()) {
@@ -1296,6 +1301,7 @@ public class OrdosName extends JavaPlugin implements Listener {
                         + "';");
                 // check to see if data has changed
                 if (RS.isBeforeFirst()) {
+                    RS.next();
                     // if the user is already in the database, update their suffix if it differs.
                     String recordedSuffix = RS.getString("townytitle");
                     if (RS.wasNull()) {
@@ -1389,26 +1395,27 @@ public class OrdosName extends JavaPlugin implements Listener {
             // it is possible that the player owns no regions, and therefore should have no WG suffix.
             if (verbose) {
                 logger.info("Player " + player.getName() + " does not own any WG regions. Resetting suffix.");
-                try {
-                    Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
-                    ResultSet RS = statement.executeQuery("SELECT wgsuffix FROM " + dbTable + " WHERE user = '"
-                            + player.getUniqueId().toString() + "';");
-                    if (RS.isBeforeFirst()) {
-                        // if the user is already in the database, update their record
-                        statement.executeUpdate("UPDATE " + dbTable + " SET wgsuffix = NULL WHERE user= '" + player.getUniqueId() + "';");
-                    } else {
-                        // if the user is not already in the database, insert a new record
-                        statement.executeQuery("INSERT INTO " + dbTable
-                                + " (user, last, wgsuffix, lastseen) VALUES ('"
-                                + player.getUniqueId().toString() + "', '" + player.getName() + "', NULL"
-                                + ", '" + timestamp + "');");
-                        logger.info("Database entry was created for " + player.getName());
-                    }
-                } catch (SQLException e1) {
-                    e1.printStackTrace();
-                }
-                return;
             }
+
+            try {
+                Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+                ResultSet RS = statement.executeQuery("SELECT wgsuffix FROM " + dbTable + " WHERE user = '"
+                        + player.getUniqueId().toString() + "';");
+                if (RS.isBeforeFirst()) {
+                    // if the user is already in the database, update their record
+                    statement.executeUpdate("UPDATE " + dbTable + " SET wgsuffix = NULL WHERE user= '" + player.getUniqueId() + "';");
+                } else {
+                    // if the user is not already in the database, insert a new record
+                    statement.executeQuery("INSERT INTO " + dbTable
+                            + " (user, last, wgsuffix, lastseen) VALUES ('"
+                            + player.getUniqueId().toString() + "', '" + player.getName() + "', NULL"
+                            + ", '" + timestamp + "');");
+                    logger.info("Database entry was created for " + player.getName());
+                }
+            } catch (SQLException e1) {
+                e1.printStackTrace();
+            }
+            return;
         } else {
             logger.info("Found " + parentCount.size() + " regions owned by player " + player.getName());
         }
@@ -1428,7 +1435,7 @@ public class OrdosName extends JavaPlugin implements Listener {
         // apply appropriate formatting
         // capitalise first letter
         regionname = regionname.substring(0, 1).toUpperCase() + regionname.substring(1);        
-        regionname = "of " + regionname;
+        regionname = " of " + regionname;
         // then query for their previous suffix - if it is different, then update the record
         try {
             Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -1436,6 +1443,7 @@ public class OrdosName extends JavaPlugin implements Listener {
                     + "';");
             // check to see if data has changed
             if (RS.isBeforeFirst()) {
+                RS.next();
                 // if the user is already in the database, update their suffix if it differs.
                 String recordedSuffix = RS.getString("wgsuffix");
                 if (RS.wasNull()) {
