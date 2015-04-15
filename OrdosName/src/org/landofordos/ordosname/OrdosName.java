@@ -1433,9 +1433,18 @@ public class OrdosName extends JavaPlugin implements Listener {
         regionname = mostCommonRegion.getKey().getId();
         
         // apply appropriate formatting
-        // capitalise first letter
-        regionname = regionname.substring(0, 1).toUpperCase() + regionname.substring(1);        
-        regionname = " of " + regionname;
+        // united--kingdom => United Kingdom
+        // split by double dashes
+        String[] splitRegionName = regionname.split("--");
+        String formattedRegionName = "";
+        for (String word : splitRegionName) {
+            // add a space and capitalise the first letter of each word
+            formattedRegionName += " " + capitaliseFirstLetter(word);
+        }
+        // trim stray spaces off the front and back
+        formattedRegionName = formattedRegionName.trim();
+        // capitalise first letter of each word      
+        regionname = " of " + formattedRegionName;
         // then query for their previous suffix - if it is different, then update the record
         try {
             Statement statement = connection.createStatement(ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
@@ -1474,6 +1483,10 @@ public class OrdosName extends JavaPlugin implements Listener {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+    }
+
+    private String capitaliseFirstLetter(String input) {
+        return input.substring(0, 1).toUpperCase() + input.substring(1);
     }
 
     public void recordDisplayName(String userUUID, String name) {
