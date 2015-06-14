@@ -1029,7 +1029,7 @@ public class OrdosName extends JavaPlugin implements Listener {
                     final long lastSeen = RS.getLong("lastseen");
                     long days = TimeUnit.DAYS.convert(now - lastSeen, TimeUnit.MILLISECONDS);
                     if (days > dbcleanuptime) {
-                        statement.executeUpdate("DELETE FROM " + dbTable + " WHERE user = " + RS.getString("user") + ");");
+                        statement.executeUpdate("DELETE FROM " + dbTable + " WHERE user = " + RS.getString("user") + ";");
                         numDeleted++;
                     }
                 }
